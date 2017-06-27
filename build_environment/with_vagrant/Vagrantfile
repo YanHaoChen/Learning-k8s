@@ -1,0 +1,22 @@
+$create_hosts = <<SCRIPT
+echo "127.0.0.1 localhost\n\n172.25.0.10 master\n172.25.0.11 node1\n172.25.0.12 node2\n172.25.0.13 node3\n" > /etc/hosts
+SCRIPT
+
+Vagrant.configure("2") do |config|
+  config.vm.define "master" do |master|
+    master.vm.box = "bento/ubuntu-16.04"
+	master.vm.hostname = "master"
+    master.vm.network "private_network", ip: "172.25.0.10"
+    master.vm.provision "shell", inline: $create_hosts
+  end
+  
+  (1..3).each do |i|
+	config.vm.define "node-#{i}" do |node|
+      node.vm.box = "bento/ubuntu-16.04"
+	  node.vm.hostname = "node#{i}"
+	  node.vm.network "private_network" , ip: "172.25.0.1#{i}"
+	  node.vm.provision "shell",
+		inline: $create_hosts
+    end
+  end
+end
